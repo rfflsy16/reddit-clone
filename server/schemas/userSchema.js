@@ -17,4 +17,8 @@ const typeDefs = `#graphql
         email:String
         password: String
     }
+
+    type Query {
+        
+    }
 `
