@@ -8,10 +8,11 @@ export default class User {
     }
 
     static async register(payload) {
-        const { username, email, password } = payload
+        const { name, username, email, password } = payload
 
         const collection = this.getCollection()
         await collection.insertOne({
+            name,
             username,
             email,
             password: hashPass(password)
