@@ -1,4 +1,4 @@
-import Post from "../models/post"
+import Post from "../models/post.js"
 
 const postTypeDefs = `#graphql
     type Comment {
@@ -26,4 +26,45 @@ const postTypeDefs = `#graphql
         updatedAt:String
 
     }
+
+        input GetPostByIdInput {
+        postId: String!
+    }
+
+    input AddPostInput {
+        content: String!
+        imgUrl: String
+        tags: [String]
+    }
+
+    input CommentInput {
+        postId: ID!
+        content: String!
+    }
+
+    input LikeInput {
+        postId: ID!
+    }
+
+    type Query {
+        getPosts: [Post]
+        getPostById(input: GetPostByIdInput): Post
+    }
+
+    type Mutation {
+    addPost(input: AddPostInput): Post
+    commentPost(input: CommentInput): String
+    likePost(input: LikeInput): String
+    }
 `
+
+const postResolvers = {
+    Query: {
+        getPosts: async (_, args, context) => {
+
+        }
+
+    }
+}
+
+export { postTypeDefs, postResolvers }

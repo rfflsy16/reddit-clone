@@ -1,5 +1,5 @@
-import { db } from "../config/mongoDB";
-import { verifyToken } from "../helpers/jwt";
+import { db } from "../config/mongoDB.js";
+import { verifyToken } from "../helpers/jwt.js";
 import { ObjectId } from "mongodb";
 
 const authentication = async (req) => {

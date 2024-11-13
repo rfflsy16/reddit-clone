@@ -19,6 +19,7 @@ export default class User {
         // console.log(email)
         if (!this.isValidEmail(email)) throw new Error('Invalid email format');
 
+        if (password.length < 5) throw new Error('Password must be more rhan 5 character');
         const collection = this.getCollection()
         const findEmail = await collection.findOne({ email })
         console.log(findEmail, '<<<<<<<<<<<<<<<<<')
@@ -55,6 +56,10 @@ export default class User {
         return {
             access_token
         }
+    }
+
+    static async getProfile() {
+
     }
 }
 

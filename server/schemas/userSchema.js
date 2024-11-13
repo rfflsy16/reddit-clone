@@ -31,32 +31,32 @@ const userTypeDefs = `#graphql
     }
 
     type Query {
-        login(user: LoginInput) : LoginResponse
         getProfile: User
     }
 
     type Mutation {
         register(newUser: RegisterInput) : GeneralResponse
+        login(user: LoginInput) : LoginResponse
     }
 `
 
 const userResolvers = {
     Query: {
+
+        getProfile: async (_, args, context) => {
+            const { userId } = await context.authentication()
+
+            return userId
+        }
+    },
+
+    Mutation: {
         login: async (_, args) => {
             const { email, password } = args.user
             const response = User.login({ email, password })
 
             return response
         },
-        getProfile: async (_, args, context) => {
-            const { user } = await context.authentication()
-
-            return user
-        }
-    },
-
-    Mutation: {
-
         register: async (_, args) => {
             const { name, username, email, password } = args.newUser
             // console.log(email, 'mamang')
