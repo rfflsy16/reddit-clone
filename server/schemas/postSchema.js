@@ -1,3 +1,5 @@
+import Post from "../models/post"
+
 const postTypeDefs = `#graphql
     type Comment {
         content: String

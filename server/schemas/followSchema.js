@@ -1,3 +1,5 @@
+import Follow from "../models/follow"
+
 const followTypeDefs = `#graphql
     type Follow {
         _id: ID

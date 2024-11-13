@@ -1,4 +1,4 @@
-import User from "../models/user"
+import User from "../models/user.js"
 
 const userTypeDefs = `#graphql
     type User {
@@ -53,5 +53,18 @@ const userResolvers = {
 
             return user
         }
+    },
+
+    Mutation: {
+
+        register: async (_, args) => {
+            const { name, username, email, password } = args.newUser
+            // console.log(email, 'mamang')
+            const response = User.register({ name, username, email, password })
+
+            return response
+        }
     }
 }
+
+export { userTypeDefs, userResolvers }

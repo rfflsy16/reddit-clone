@@ -1,16 +1,30 @@
-import { db } from "../config/mongoDB";
-import { comparePass, hashPass } from "../helpers/bcrypt";
-import { signToken } from "../helpers/jwt";
+import { db } from "../config/mongoDB.js";
+import { comparePass, hashPass } from "../helpers/bcrypt.js";
+import { signToken } from "../helpers/jwt.js";
 
 export default class User {
     static getCollection() {
         return db.collection('Users')
     }
+    static isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
 
     static async register(payload) {
+        // console.log('masukkkkk')
         const { name, username, email, password } = payload
 
+        // console.log(email)
+        if (!this.isValidEmail(email)) throw new Error('Invalid email format');
+
         const collection = this.getCollection()
+        const findEmail = await collection.findOne({ email })
+        console.log(findEmail, '<<<<<<<<<<<<<<<<<')
+
+        if (findEmail) throw new Error('Email must be unique')
+
         await collection.insertOne({
             name,
             username,
@@ -43,3 +57,4 @@ export default class User {
         }
     }
 }
+
