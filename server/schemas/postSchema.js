@@ -1,3 +1,4 @@
+import redis from "../config/redit.js"
 import Post from "../models/post.js"
 
 const postTypeDefs = `#graphql
@@ -31,10 +32,15 @@ const postTypeDefs = `#graphql
         postId: String!
     }
 
+    type ResultAddPost {
+        message: String
+    }
+
     input AddPostInput {
         content: String!
         imgUrl: String
         tags: [String]
+        authorId: ID
     }
 
     input CommentInput {
@@ -47,12 +53,12 @@ const postTypeDefs = `#graphql
     }
 
     type Query {
-        getPosts: [Post]
+        find: [Post]
         getPostById(input: GetPostByIdInput): Post
     }
 
     type Mutation {
-    addPost(input: AddPostInput): Post
+    addPost(input: AddPostInput): ResultAddPost
     commentPost(input: CommentInput): String
     likePost(input: LikeInput): String
     }
@@ -60,10 +66,25 @@ const postTypeDefs = `#graphql
 
 const postResolvers = {
     Query: {
-        getPosts: async (_, args, context) => {
+        find: async (_, args, context) => {
+            // console.log('MASUKKKK')
+            const cachePosts = await redis.get("posts")
+            if (cachePosts) return JSON.parse(cachePosts);
 
+            const posts = await Post.find()
+            await redis.set('posts', JSON.stringify(posts))
+
+            return posts
         }
+    },
+    Mutation: {
+        addPost: async (_, args, context) => {
+            const { content, tags, imgUrl, authorId } = args.input
+            const posts = await Post.addPost({ content, tags, imgUrl, authorId })
 
+            // console.log(posts)
+            return posts
+        }
     }
 }
 

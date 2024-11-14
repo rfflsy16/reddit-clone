@@ -1,4 +1,4 @@
-import Follow from "../models/follow"
+import Follow from "../models/follow.js"
 
 const followTypeDefs = `#graphql
     type Follow {
@@ -9,3 +9,13 @@ const followTypeDefs = `#graphql
         updatedAt: String
     }
 `
+const followResolvers = {
+    Query: {
+
+    },
+    Mutation: {
+
+    }
+}
+
+export { followTypeDefs, followResolvers }

@@ -32,6 +32,7 @@ const userTypeDefs = `#graphql
 
     type Query {
         getProfile: User
+        
     }
 
     type Mutation {
@@ -42,7 +43,6 @@ const userTypeDefs = `#graphql
 
 const userResolvers = {
     Query: {
-
         getProfile: async (_, args, context) => {
             const { userId } = await context.authentication()
 

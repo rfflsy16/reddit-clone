@@ -8,6 +8,7 @@ import { postResolvers, postTypeDefs } from "./schemas/postSchema.js";
 
 // console.log(process.env.SECRET_KEY)
 
+
 const server = new ApolloServer({
     typeDefs: [userTypeDefs, postTypeDefs],
     resolvers: [userResolvers, postResolvers]
