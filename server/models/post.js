@@ -9,6 +9,8 @@ export default class Post {
     static async getPost() {
         const collection = this.getCollection()
 
+        // console.log(collection, "<<<<<<<<<<")
+
         const posts = await collection.aggregate([
             {
                 $lookup: {
@@ -31,10 +33,12 @@ export default class Post {
             {
                 $unwind: {
                     path: "$Author",
-                    preserveNullAndEmptyArrays: true,
+                    preserveNullAndEmptyArrays: false,
                 },
             }
         ]).toArray()
+
+        console.log(posts, "<<<<<<<<<<<<<<<<<<<")
 
         return posts
     }
@@ -58,7 +62,7 @@ export default class Post {
 
         await collection.insertOne({
             content,
-            tags: [tags],
+            tags,
             imgUrl,
             authorId: new ObjectId(infoUser.userId),
             comments: [],
@@ -72,7 +76,7 @@ export default class Post {
         }
     }
 
-    static async commentPost(payload) {
+    static async commentPost(payload, infoUser) {
         const collection = this.getCollection()
 
         const { postId, content } = payload
@@ -91,7 +95,9 @@ export default class Post {
                 },
             }
         )
-        return 'Success add Comment'
+        return {
+            message: 'Success add Comment'
+        }
     }
 
     static async likePost(payload) {
@@ -111,6 +117,8 @@ export default class Post {
                 }
             }
         )
-        return 'Success add Like to the post'
+        return {
+            message: 'Success add Like to the post'
+        }
     }
 }

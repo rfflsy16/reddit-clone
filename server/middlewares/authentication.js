@@ -26,7 +26,7 @@ const authentication = async (req) => {
 
     if (!userLogin) throw new Error('Unauthorized');
 
-    console.log(userLogin)
+    // console.log(userLogin)
 
     return {
         userId: userLogin._id,

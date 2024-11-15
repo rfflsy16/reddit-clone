@@ -32,7 +32,7 @@ const postTypeDefs = `#graphql
         postId: String!
     }
 
-    type ResultAddPost {
+    type Response {
         message: String
     }
 
@@ -58,9 +58,9 @@ const postTypeDefs = `#graphql
     }
 
     type Mutation {
-        addPost(input: AddPostInput): ResultAddPost
-        commentPost(inputComment: CommentInput): String
-        likePost(inputLike: LikeInput): String
+        addPost(input: AddPostInput): Response
+        commentPost(inputComment: CommentInput): Response
+        likePost(inputLike: LikeInput): Response
     }
 `
 
@@ -70,9 +70,12 @@ const postResolvers = {
             await context.authenticate()
             // console.log('MASUKKKK')
             const cachePosts = await redis.get("posts")
+            // console.log(cachePosts, "<<<<<");
+
             if (cachePosts) return JSON.parse(cachePosts);
 
             const posts = await Post.getPost()
+            // console.log(posts)
             await redis.set('posts', JSON.stringify(posts))
 
             return posts
@@ -95,11 +98,13 @@ const postResolvers = {
             const { content, tags, imgUrl } = args.input
             const posts = await Post.addPost({ content, tags, imgUrl }, infoUser)
 
-            console.log(posts)
+            await redis.del("posts")
+            // console.log(posts)
             return posts
         },
         commentPost: async (_, args, context) => {
             const infoUser = await context.authenticate()
+            console.log(infoUser, "<<<<<<<")
             const { postId, content } = args.inputComment
             const comment = await Post.commentPost({ postId, content }, infoUser)
 
