@@ -76,6 +76,16 @@ const postResolvers = {
             await redis.set('posts', JSON.stringify(posts))
 
             return posts
+        },
+        getPostById: async (_, args, context) => {
+            await context.authenticate()
+            const cachePosts = await redis.get("posts")
+            if (cachePosts) return JSON.parse(cachePosts);
+
+            const { postId } = args.input
+            const getPostById = await Post.getPostById({ postId })
+
+            return getPostById
         }
     },
     Mutation: {
@@ -103,7 +113,7 @@ const postResolvers = {
             const { postId, username } = args.inputLike
             const like = await Post.likePost({ postId, username }, infoUser)
 
-            console.log(like, "<<<<<<<<<<<<<<<")
+            // console.log(like, "<<<<<<<<<<<<<<<")
             return like
         }
     }

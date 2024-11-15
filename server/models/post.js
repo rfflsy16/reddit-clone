@@ -39,6 +39,13 @@ export default class Post {
         return posts
     }
 
+    static async getPostById(postId) {
+        const collection = this.getCollection()
+
+        const postById = await collection.findOne(postId)
+    }
+
+
     static async addPost(payload, infoUser) {
         const { content, tags, imgUrl } = payload
 
@@ -104,5 +111,6 @@ export default class Post {
                 }
             }
         )
+        return 'Success add Like to the post'
     }
 }
