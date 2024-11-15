@@ -28,7 +28,7 @@ const postTypeDefs = `#graphql
 
     }
 
-        input GetPostByIdInput {
+    input GetPostByIdInput {
         postId: String!
     }
 
@@ -53,25 +53,26 @@ const postTypeDefs = `#graphql
     }
 
     type Query {
-        find: [Post]
+        getPost: [Post]
         getPostById(input: GetPostByIdInput): Post
     }
 
     type Mutation {
-    addPost(input: AddPostInput): ResultAddPost
-    commentPost(input: CommentInput): String
-    likePost(input: LikeInput): String
+        addPost(input: AddPostInput): ResultAddPost
+        commentPost(inputComment: CommentInput): String
+        likePost(inputLike: LikeInput): String
     }
 `
 
 const postResolvers = {
     Query: {
-        find: async (_, args, context) => {
+        getPost: async (_, args, context) => {
+            await context.authenticate()
             // console.log('MASUKKKK')
             const cachePosts = await redis.get("posts")
             if (cachePosts) return JSON.parse(cachePosts);
 
-            const posts = await Post.find()
+            const posts = await Post.getPost()
             await redis.set('posts', JSON.stringify(posts))
 
             return posts
@@ -79,11 +80,31 @@ const postResolvers = {
     },
     Mutation: {
         addPost: async (_, args, context) => {
-            const { content, tags, imgUrl, authorId } = args.input
-            const posts = await Post.addPost({ content, tags, imgUrl, authorId })
+            const infoUser = await context.authenticate()
+            // console.log(infoUser, '<<<<<<<<<<')
+            const { content, tags, imgUrl } = args.input
+            const posts = await Post.addPost({ content, tags, imgUrl }, infoUser)
 
-            // console.log(posts)
+            console.log(posts)
             return posts
+        },
+        commentPost: async (_, args, context) => {
+            const infoUser = await context.authenticate()
+            const { postId, content } = args.inputComment
+            const comment = await Post.commentPost({ postId, content }, infoUser)
+
+            // console.log('masukk');
+
+            await redis.del('posts')
+            return comment
+        },
+        likePost: async (_, args, context) => {
+            const infoUser = await context.authenticate()
+            const { postId, username } = args.inputLike
+            const like = await Post.likePost({ postId, username }, infoUser)
+
+            console.log(like, "<<<<<<<<<<<<<<<")
+            return like
         }
     }
 }

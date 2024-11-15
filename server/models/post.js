@@ -6,7 +6,7 @@ export default class Post {
         return db.collection('Posts')
     }
 
-    static async find() {
+    static async getPost() {
         const collection = this.getCollection()
 
         const posts = await collection.aggregate([
@@ -34,32 +34,75 @@ export default class Post {
                     preserveNullAndEmptyArrays: true,
                 },
             }
-        ])
+        ]).toArray()
+
+        return posts
     }
 
-    static async addPost(payload) {
-        const { content, tags, imgUrl, authorId } = payload
+    static async addPost(payload, infoUser) {
+        const { content, tags, imgUrl } = payload
 
+        // console.log(content, tags, imgUrl)
         if (content === undefined) throw new Error('content is required')
-        if (tags === undefined) throw new Error('tags is required')
-        if (imgUrl === undefined) throw new Error('imgUrl is required')
-        if (authorId === undefined) throw new Error('authorId is required')
+        // if (tags === undefined) throw new Error('tags is required')
+        // if (imgUrl === undefined) throw new Error('imgUrl is required')
 
         const collection = this.getCollection()
 
         await collection.insertOne({
             content,
-            tags,
+            tags: [tags],
             imgUrl,
-            authorId: new ObjectId()
+            authorId: new ObjectId(infoUser.userId),
+            comments: [],
+            likes: [],
+            createdAt: new Date(),
+            updatedAt: new Date()
         })
 
         return {
-            message: 'Success add new Post',
-            // content,
-            // tags,
-            // imgUrl,
-            // authorId
+            message: 'Success add new Post'
         }
+    }
+
+    static async commentPost(payload) {
+        const collection = this.getCollection()
+
+        const { postId, content } = payload
+        await collection.updateOne(
+            {
+                _id: new ObjectId(postId),
+            },
+            {
+                $push: {
+                    comments: {
+                        content,
+                        username: infoUser.username,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    },
+                },
+            }
+        )
+        return 'Success add Comment'
+    }
+
+    static async likePost(payload) {
+        const { postId, username } = payload
+
+        const collection = this.getCollection()
+
+        await collection.updateOne(
+            {
+                _id: new ObjectId(postId)
+            },
+            {
+                $push: {
+                    likes: {
+                        username
+                    }
+                }
+            }
+        )
     }
 }
