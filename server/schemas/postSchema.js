@@ -78,16 +78,22 @@ const postResolvers = {
             // console.log(posts)
             await redis.set('posts', JSON.stringify(posts))
 
+            // console.log(posts)
             return posts
         },
         getPostById: async (_, args, context) => {
             await context.authenticate()
+            // console.log('masukkk')
+            // await redis.del('posts')
             const cachePosts = await redis.get("posts")
             if (cachePosts) return JSON.parse(cachePosts);
+            // console.log(cachePosts, "<<<<<<<<<<<")
 
             const { postId } = args.input
             const getPostById = await Post.getPostById({ postId })
 
+            await redis.set('posts', JSON.stringify(getPostById))
+            // console.log(getPostById, "<<<<<<<<<<<<<<,,")
             return getPostById
         }
     },
@@ -104,7 +110,7 @@ const postResolvers = {
         },
         commentPost: async (_, args, context) => {
             const infoUser = await context.authenticate()
-            console.log(infoUser, "<<<<<<<")
+            // console.log(infoUser, "<<<<<<<")
             const { postId, content } = args.inputComment
             const comment = await Post.commentPost({ postId, content }, infoUser)
 

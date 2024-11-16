@@ -17,7 +17,22 @@ const userTypeDefs = `#graphql
         access_token: String
     }
 
+    type GetUserByIdResponse {
+            _id: ID!
+        name: String
+        username: String!
+        email: String!
+        Followings: [User]
+        Followers: [User]
+    }
 
+    input GetUserByIdInput {
+        userId: String
+    }
+
+    input SearchUserInput {
+        keyword: String!
+    }
     input RegisterInput {
         name: String
         username: String
@@ -32,7 +47,7 @@ const userTypeDefs = `#graphql
 
     type Query {
         getProfile: User
-        
+        search(profile: SearchUserInput): User
     }
 
     type Mutation {

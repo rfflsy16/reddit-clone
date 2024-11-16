@@ -38,17 +38,46 @@ export default class Post {
             }
         ]).toArray()
 
-        console.log(posts, "<<<<<<<<<<<<<<<<<<<")
+        // console.log(posts, "<<<<<<<<<<<<<<<<<<<")
 
         return posts
     }
 
     static async getPostById(postId) {
         const collection = this.getCollection()
+        const postById = await collection.aggregate([
+            {
+                $match: {
+                    _id: new ObjectId(postId),
+                },
+            },
+            {
+                $lookup: {
+                    from: "Users",
+                    localField: "authorId",
+                    foreignField: "_id",
+                    as: "Author",
+                },
+            },
+            {
+                $project: {
+                    "Author.password": 0,
+                },
+            },
+            {
+                $unwind: {
+                    path: "$Author",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+        ]).toArray()
 
-        const postById = await collection.findOne(postId)
+        // console.log(postById, "<<<<<<<<<<<<")
+        if (!postById) throw new Error('Post not Found 404')
+
+
+        return postById
     }
-
 
     static async addPost(payload, infoUser) {
         const { content, tags, imgUrl } = payload

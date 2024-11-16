@@ -8,13 +8,28 @@ const followTypeDefs = `#graphql
         createdAt: String
         updatedAt: String
     }
+
+    type ResponseFollow {
+        message: String
+    }
+    input FollowInput {
+        followingId: ID
+    }
+
+    type Mutation {
+        followUser(input: FollowInput): ResponseFollow
+    }
 `
 const followResolvers = {
-    Query: {
-
-    },
     Mutation: {
+        followUser: async (_, args, context) => {
+            const infoUser = await context.authenticate()
 
+            const { followingId } = args.input
+            const follow = await Follow.addFollow({ followingId }, infoUser)
+
+            return follow
+        }
     }
 }
 
