@@ -16,6 +16,7 @@ export default class Follow {
             followerId,
         };
 
+        // console.log(followInput)
         try {
             const existingFollow = await collection.findOne(followInput);
 
