@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { db } from "../config/mongoDB.js";
+import { db } from "../config/mongoDB01.js";
 
 export default class Follow {
     static getCollection() {
