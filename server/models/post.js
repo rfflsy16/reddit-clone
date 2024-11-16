@@ -81,7 +81,7 @@ export default class Post {
 
         if (!content) throw new Error("Content is required");
 
-        console.log(content, "<<<<<<<<")
+        // console.log(content, "<<<<<<<<")
         const collection = this.getCollection();
 
         await collection.insertOne({
