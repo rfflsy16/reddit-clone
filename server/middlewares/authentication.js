@@ -1,4 +1,4 @@
-import { db } from "../config/mongoDB01.js";
+import { db } from "../config/mongoDB.js";
 import { verifyToken } from "../helpers/jwt.js";
 import { ObjectId } from "mongodb";
 

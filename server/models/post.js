@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { db } from "../config/mongoDB01.js";
+import { db } from "../config/mongoDB.js";
 
 export default class Post {
     static getCollection() {
