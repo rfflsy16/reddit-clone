@@ -67,67 +67,74 @@ const postTypeDefs = `#graphql
 const postResolvers = {
     Query: {
         getPost: async (_, args, context) => {
-            await context.authenticate()
-            // console.log('MASUKKKK')
-            const cachePosts = await redis.get("posts")
-            // console.log(cachePosts, "<<<<<");
+            await context.authenticate();
+            // console.log("masukkkk")
+
+            const cachePosts = await redis.get("posts");
 
             if (cachePosts) return JSON.parse(cachePosts);
 
-            const posts = await Post.getPost()
-            // console.log(posts)
-            await redis.set('posts', JSON.stringify(posts))
+            const posts = await Post.getPost();
 
             // console.log(posts)
-            return posts
+            await redis.set("posts", JSON.stringify(posts), "EX", 3600);
+
+            return posts;
         },
         getPostById: async (_, args, context) => {
-            await context.authenticate()
-            // console.log('masukkk')
-            // await redis.del('posts')
-            const cachePosts = await redis.get("posts")
-            if (cachePosts) return JSON.parse(cachePosts);
-            // console.log(cachePosts, "<<<<<<<<<<<")
+            await context.authenticate();
+            // console.log("masukkkk")
 
-            const { postId } = args.input
-            const getPostById = await Post.getPostById({ postId })
+            const { postId } = args.input;
 
-            await redis.set('posts', JSON.stringify(getPostById))
-            // console.log(getPostById, "<<<<<<<<<<<<<<,,")
-            return getPostById
-        }
+            // console.log(postId)
+            if (!postId) throw new Error("postId is required");
+
+            const cachePost = await redis.get(`post:${postId}`);
+            if (cachePost) return JSON.parse(cachePost);
+            // console.log(cachePost)
+
+            const post = await Post.getPostById({ postId });
+            await redis.set(`post:${postId}`, JSON.stringify(post), { EX: 3600 });
+            return post;
+        },
     },
     Mutation: {
         addPost: async (_, args, context) => {
-            const infoUser = await context.authenticate()
-            // console.log(infoUser, '<<<<<<<<<<')
-            const { content, tags, imgUrl } = args.input
-            const posts = await Post.addPost({ content, tags, imgUrl }, infoUser)
+            const infoUser = await context.authenticate();
+            // console.log("masukkkk")
 
-            await redis.del("posts")
-            // console.log(posts)
-            return posts
+            const { content, tags, imgUrl } = args.input;
+            const response = await Post.addPost({ content, tags, imgUrl }, infoUser);
+
+            // console.log(response)
+            await redis.del("posts");
+            return response;
         },
         commentPost: async (_, args, context) => {
-            const infoUser = await context.authenticate()
-            // console.log(infoUser, "<<<<<<<")
-            const { postId, content } = args.inputComment
-            const comment = await Post.commentPost({ postId, content }, infoUser)
+            const infoUser = await context.authenticate();
+            // console.log("masukkkk")
+            // console.log(infoUser)
+            const { postId, content } = args.inputComment;
+            const response = await Post.commentPost({ postId, content }, infoUser);
 
-            // console.log('masukk');
-
-            await redis.del('posts')
-            return comment
+            await redis.del("posts");
+            await redis.del(`post:${postId}`);
+            return response;
         },
         likePost: async (_, args, context) => {
-            const infoUser = await context.authenticate()
-            const { postId, username } = args.inputLike
-            const like = await Post.likePost({ postId, username }, infoUser)
+            const infoUser = await context.authenticate();
+            // console.log(infoUser)
 
-            // console.log(like, "<<<<<<<<<<<<<<<")
-            return like
-        }
-    }
-}
+            const { postId, username } = args.inputLike;
+            const response = await Post.likePost({ postId, username }, infoUser);
+
+            await redis.del("posts");
+            await redis.del(`post:${postId}`);
+
+            return response
+        },
+    },
+};
 
 export { postTypeDefs, postResolvers }

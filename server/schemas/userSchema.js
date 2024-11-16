@@ -46,8 +46,9 @@ const userTypeDefs = `#graphql
     }
 
     type Query {
-        getProfile: User
-        search(profile: SearchUserInput): User
+        getUserById(input: GetUserByIdInput): GetUserByIdResponse
+        searchUsers(profile: SearchUserInput): User
+        getProfile: GetUserByIdResponse
     }
 
     type Mutation {
@@ -58,10 +59,35 @@ const userTypeDefs = `#graphql
 
 const userResolvers = {
     Query: {
-        getProfile: async (_, args, context) => {
-            const { userId } = await context.authentication()
+        searchUsers: async (_, args, context) => {
+            // console.log("masukkkk")
+            const { keyword } = args.profile
 
-            return userId
+            const search = await User.searchUsers({ keyword })
+
+            return search
+        },
+        getUserById: async (_, args, context) => {
+            // console.log("masukkk")
+
+            await context.authenticate()
+            const { userId } = args.input
+
+            const getUser = await User.getUserById({ userId })
+            return getUser
+        },
+        getProfile: async (_, args, context) => {
+            try {
+                const infoUser = await context.authenticate()
+
+                // console.log(infoUser.userId, "<<<<<<<<<<<")
+
+                const profile = await User.getProfile(infoUser)
+
+                return profile
+            } catch (error) {
+                console.log(error)
+            }
         }
     },
 

@@ -3,42 +3,43 @@ import { db } from "../config/mongoDB.js";
 
 export default class Follow {
     static getCollection() {
-        return db.collection("Follows")
+        return db.collection("Follows");
     }
 
     static async addFollow(payload, infoUser) {
-        const collection = this.getCollection()
-
-        const { followingId } = payload
-
-        const followerId = new ObjectId(infoUser.userId)
+        const collection = this.getCollection();
+        const { followingId } = payload;
+        const followerId = new ObjectId(infoUser.userId);
 
         const followInput = {
             followingId: new ObjectId(followingId),
-            followerId
-        }
-        const existingFollow = await collection.findOne(followInput)
+            followerId,
+        };
 
-        if (existingFollow) {
-            await collection.deleteOne(followInput)
+        try {
+            const existingFollow = await collection.findOne(followInput);
 
-            return 'Unfollow Success'
-        }
+            if (existingFollow) {
+                await collection.deleteOne(followInput);
 
-        const dataFollow = {
-            ...followInput,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        }
+                return {
+                    message: "Unfollow Success",
+                };
+            }
 
-        const followReport = await collection.insertOne(dataFollow)
+            const dataFollow = {
+                ...followInput,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
 
-        console.log(followReport.insertedId)
+            await collection.insertOne(dataFollow);
 
-        await collection.findOne({ _id: new ObjectId(followReport.insertedId) })
-
-        return {
-            message: 'Follow Success'
+            return {
+                message: "Follow Success",
+            };
+        } catch (error) {
+            throw new Error("Failed to follow/unfollow user.");
         }
     }
 }

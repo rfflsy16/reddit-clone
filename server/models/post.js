@@ -3,13 +3,11 @@ import { db } from "../config/mongoDB.js";
 
 export default class Post {
     static getCollection() {
-        return db.collection('Posts')
+        return db.collection('Posts');
     }
 
     static async getPost() {
-        const collection = this.getCollection()
-
-        // console.log(collection, "<<<<<<<<<<")
+        const collection = this.getCollection();
 
         const posts = await collection.aggregate([
             {
@@ -35,16 +33,15 @@ export default class Post {
                     path: "$Author",
                     preserveNullAndEmptyArrays: false,
                 },
-            }
-        ]).toArray()
+            },
+        ]).toArray();
 
-        // console.log(posts, "<<<<<<<<<<<<<<<<<<<")
-
-        return posts
+        return posts;
     }
 
-    static async getPostById(postId) {
-        const collection = this.getCollection()
+    static async getPostById({ postId }) {
+        const collection = this.getCollection();
+
         const postById = await collection.aggregate([
             {
                 $match: {
@@ -70,49 +67,48 @@ export default class Post {
                     preserveNullAndEmptyArrays: true,
                 },
             },
-        ]).toArray()
+        ]).toArray();
 
-        // console.log(postById, "<<<<<<<<<<<<")
-        if (!postById) throw new Error('Post not Found 404')
+        if (!postById || postById.length === 0) {
+            throw new Error("Post not found");
+        }
 
-
-        return postById
+        return postById[0];
     }
 
     static async addPost(payload, infoUser) {
-        const { content, tags, imgUrl } = payload
+        const { content, tags, imgUrl } = payload;
 
-        // console.log(content, tags, imgUrl)
-        if (content === undefined) throw new Error('content is required')
-        // if (tags === undefined) throw new Error('tags is required')
-        // if (imgUrl === undefined) throw new Error('imgUrl is required')
+        if (!content) throw new Error("Content is required");
 
-        const collection = this.getCollection()
+        console.log(content, "<<<<<<<<")
+        const collection = this.getCollection();
 
         await collection.insertOne({
             content,
-            tags,
-            imgUrl,
+            tags: tags || [],
+            imgUrl: imgUrl || null,
             authorId: new ObjectId(infoUser.userId),
             comments: [],
             likes: [],
             createdAt: new Date(),
-            updatedAt: new Date()
-        })
+            updatedAt: new Date(),
+        });
 
-        return {
-            message: 'Success add new Post'
-        }
+        return { message: "Success add new Post" };
     }
 
     static async commentPost(payload, infoUser) {
-        const collection = this.getCollection()
+        const { postId, content } = payload;
 
-        const { postId, content } = payload
+        // console.log(postId, content, "<<<<<<<<")
+        const collection = this.getCollection();
+
+        const post = await collection.findOne({ _id: new ObjectId(postId) });
+        if (!post) throw new Error("Post not found");
+
         await collection.updateOne(
-            {
-                _id: new ObjectId(postId),
-            },
+            { _id: new ObjectId(postId) },
             {
                 $push: {
                     comments: {
@@ -123,31 +119,37 @@ export default class Post {
                     },
                 },
             }
-        )
-        return {
-            message: 'Success add Comment'
-        }
+        );
+
+        return { message: "Success add Comment" };
     }
 
     static async likePost(payload) {
-        const { postId, username } = payload
+        const { postId, username } = payload;
 
-        const collection = this.getCollection()
+        const collection = this.getCollection();
+
+        const post = await collection.findOne({
+            _id: new ObjectId(postId),
+            "likes.username": username,
+        });
+
+        // console.log(post)
+        if (post) throw new Error("User already liked this post");
 
         await collection.updateOne(
-            {
-                _id: new ObjectId(postId)
-            },
+            { _id: new ObjectId(postId) },
             {
                 $push: {
                     likes: {
-                        username
-                    }
-                }
+                        username,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    },
+                },
             }
-        )
-        return {
-            message: 'Success add Like to the post'
-        }
+        );
+
+        return { message: "Successfully liked the post" };
     }
 }
