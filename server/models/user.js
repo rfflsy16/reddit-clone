@@ -127,6 +127,7 @@ export default class User {
 
         const { keyword } = payload
 
+        // console.log(keyword)
         const searchUser = await collection.find({
             $or: [
                 { name: { $regex: keyword, $options: "i" } },
@@ -134,9 +135,9 @@ export default class User {
             ],
         }).toArray()
 
-        console.log(searchUser)
+        // console.log(searchUser)
 
-        return searchUser
+        return searchUser[0]
     }
 
     static async getProfile(infoUser) {

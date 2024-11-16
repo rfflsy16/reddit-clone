@@ -65,6 +65,7 @@ const userResolvers = {
 
             const search = await User.searchUsers({ keyword })
 
+            console.log(search)
             return search
         },
         getUserById: async (_, args, context) => {
@@ -86,7 +87,7 @@ const userResolvers = {
 
                 return profile
             } catch (error) {
-                console.log(error)
+                // console.log(error)
             }
         }
     },
