@@ -5,7 +5,7 @@ import client from "./config/apolloClient-config";
 import { LoginContext } from "./contexts/LoginContext";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screens/HomeScreen";
-import PostScreen from "./screens/PostScreen";
+import PostScreen from "./screens/AddPostScreen";
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from "./screens/RegisterScreen";
 import isSignOut from "./hooks/isSignOut";

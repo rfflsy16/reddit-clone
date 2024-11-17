@@ -8,8 +8,9 @@ import { useContext, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen = (props) => {
-    const access_token = SecureStore.getItem("access_token")
+    const [access_token, setAccessToken] = useState(SecureStore.getItem("access_token"))
     const { navigation } = props;
+    const navigate = useNavigation()
     const authContext = useContext(LoginContext)
     const [loginFn, { loading, error, data }] = useMutation(LOGIN);
 
@@ -18,13 +19,16 @@ const LoginScreen = (props) => {
     useEffect(() => {
         if (access_token) {
             // authContext.setIsLogin(true)
-            navigation.push('Home')
+            navigation.push('MainTab')
         }
     }, [access_token])
 
     useEffect(() => {
         if (data) {
             SecureStore.setItem("access_token", data.login.access_token)
+            if (data.login.access_token) {
+                setAccessToken(data.login.access_token)
+            }
         }
     }, [data])
 
@@ -46,7 +50,7 @@ const LoginScreen = (props) => {
         })
 
         if (access_token) {
-            navigation.push("Home")
+            navigate.navigate("MainTab")
         }
 
     }

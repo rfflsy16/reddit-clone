@@ -1,11 +1,12 @@
 import { View, FlatList, TextInput, TouchableOpacity, Text, Image, Button } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store'
 import { useMutation, useQuery } from '@apollo/client';
 import { GET_POST } from '../queries';
 import { StyleSheet } from 'react-native';
-
+import { useNavigation } from '@react-navigation/native';
+import moment from 'moment/moment';
 
 // const data = [
 //     {
@@ -26,6 +27,7 @@ import { StyleSheet } from 'react-native';
 const HomeScreen = (props) => {
     const access_token = SecureStore.getItem('access_token')
     const { navigation } = props;
+    const navigate = useNavigation()
     const { loading, error, data } = useQuery(GET_POST)
 
     if (loading) return <Text>Loading ... </Text>
@@ -46,10 +48,19 @@ const HomeScreen = (props) => {
             likes,
             createdAt
         } = item
+
         return (
             <View style={styles.cardItem}>
                 <View style={styles.cardItemTop}>
                     <Text>{content}</Text>
+                    {
+                        imgUrl ?
+                            <Image
+                                style={{ flex: 1, }}
+                                source={{ uri: imgUrl }}
+                                resizeMode='contain'
+                            /> : null
+                    }
                     {/* <Text>{authorId}</Text> */}
                 </View>
                 <View style={styles.cardItemBottom}>
@@ -57,7 +68,7 @@ const HomeScreen = (props) => {
                         <Text>{comments?.length}</Text>
                         <FontAwesome5 name="comment" style={{ fontSize: 20, marginLeft: 5, }} />
                     </View>
-                    <Text>{createdAt}</Text>
+                    <Text>Posted at {moment(createdAt).format('DD MMM \'YY')}</Text>
                 </View>
             </View>
         )
@@ -65,9 +76,11 @@ const HomeScreen = (props) => {
 
     return (
         <>
-            <Button title='Profile' onPress={() => navigation.push('Profile')} />
-            <View>
-                <Button title='Logout' onPress={logout} />
+            <View style={styles.topAction}>
+                <TextInput placeholder='Search' style={styles.searchBox} />
+                <TouchableOpacity style={{ padding: 5 }} onPress={() => navigate.navigate('AddPost')}>
+                    <FontAwesome name="plus" style={{ fontSize: 24 }} />
+                </TouchableOpacity>
             </View>
             <View style={styles.container}>
                 <FlatList
@@ -76,6 +89,7 @@ const HomeScreen = (props) => {
                     keyExtractor={(it, idx) => `list-item-${idx.toString()}`}
                 />
             </View>
+
         </>
 
     )
@@ -119,6 +133,22 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         backgroundColor: '#f54242',
         marginBottom: 30,
+    },
+    topAction: {
+        alignItems: 'center',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    searchBox: {
+        borderWidth: 1,
+        borderColor: '#dadada',
+        borderRadius: 5,
+        flex: 1,
+        paddingVertical: 10,
+        paddingHorizontal: 5,
+        marginRight: 10,
     }
 
 });
