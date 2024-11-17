@@ -1,10 +1,47 @@
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 
+import { LoginContext } from '../contexts/LoginContext';
+import { LOGIN } from '../queries';
+import * as SecureStore from 'expo-secure-store'
+import { useMutation } from '@apollo/client';
+import { useContext, useEffect, useState } from 'react';
+
 const LoginScreen = (props) => {
     const { navigation } = props;
+    const authContext = useContext(LoginContext)
+    const [loginFn, { data, loading, error }] = useMutation(LOGIN);
+    // const loginFn = useMutation(LOGIN)
+
+    useEffect(() => {
+        const access_token = SecureStore.getItem("access_token")
+        if (access_token) {
+            // authContext.setIsLogin(true)
+        }
+    }, [])
+
+    // useEffect(() => {
+    //     if (data) {
+    //         SecureStore.setItem("access_token", data.login.access_token)
+    //     }
+    // })
+
+    const [input, setInput] = useState({
+        email: '',
+        password: ''
+    })
 
     const onRegisterPress = () => {
         navigation.push('Register')
+    }
+
+    const onPressLogin = () => {
+        // if (!email || !password) throw new Error("Email and password is required");
+
+        loginFn({
+            variables: {
+                user: input
+            }
+        })
     }
 
     return (
@@ -17,18 +54,25 @@ const LoginScreen = (props) => {
                         <Text>Register</Text>
                     </TouchableOpacity>
                 </View>
-                <Text style={styles.title}>Masukkan Informasi Login Kamu</Text>
+                <Text style={styles.title}>Enter Your Login Information</Text>
                 <View style={styles.inputWrapper}>
-                    <TextInput placeholder='Username' style={styles.textinput} />
+                    <TextInput placeholder='Email' style={styles.textinput} inputMode='email' />
                 </View>
                 <View style={styles.inputWrapper}>
                     <TextInput secureTextEntry
                         placeholder='Password'
                         style={styles.textinput}
+                        value={input.password}
+                        onChangeText={(text) => {
+                            setInput({
+                                ...input,
+                                password: text
+                            })
+                        }}
                     />
                 </View>
             </View>
-            <TouchableOpacity style={styles.loginButton}>
+            <TouchableOpacity style={styles.loginButton} onPress={() => onPressLogin()}>
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
         </View>
