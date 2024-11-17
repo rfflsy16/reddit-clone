@@ -1,29 +1,30 @@
-import { View, TextInput, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, Button } from 'react-native';
 
 import { LoginContext } from '../contexts/LoginContext';
 import { LOGIN } from '../queries';
 import * as SecureStore from 'expo-secure-store'
 import { useMutation } from '@apollo/client';
 import { useContext, useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen = (props) => {
+    const access_token = SecureStore.getItem("access_token")
     const { navigation } = props;
     const authContext = useContext(LoginContext)
     const [loginFn, { data, loading, error }] = useMutation(LOGIN);
-    // const loginFn = useMutation(LOGIN)
 
     useEffect(() => {
-        const access_token = SecureStore.getItem("access_token")
         if (access_token) {
             // authContext.setIsLogin(true)
+            navigation.push('Home')
         }
-    }, [])
+    }, [access_token])
 
-    // useEffect(() => {
-    //     if (data) {
-    //         SecureStore.setItem("access_token", data.login.access_token)
-    //     }
-    // })
+    useEffect(() => {
+        if (data) {
+            SecureStore.setItem("access_token", data.login.access_token)
+        }
+    }, [data])
 
     const [input, setInput] = useState({
         email: '',
@@ -33,15 +34,19 @@ const LoginScreen = (props) => {
     const onRegisterPress = () => {
         navigation.push('Register')
     }
-
     const onPressLogin = () => {
-        // if (!email || !password) throw new Error("Email and password is required");
+        // if (!input.email || !input.password) throw new Error("Email and password is required");
 
         loginFn({
             variables: {
                 user: input
             }
         })
+
+        if (access_token) {
+            navigation.push("Home")
+        }
+
     }
 
     return (
@@ -56,7 +61,16 @@ const LoginScreen = (props) => {
                 </View>
                 <Text style={styles.title}>Enter Your Login Information</Text>
                 <View style={styles.inputWrapper}>
-                    <TextInput placeholder='Email' style={styles.textinput} inputMode='email' />
+                    <TextInput placeholder='Email'
+                        style={styles.textinput}
+                        value={input.email}
+                        inputMode='email'
+                        onChangeText={(text) => {
+                            setInput({
+                                ...input,
+                                email: text
+                            })
+                        }} />
                 </View>
                 <View style={styles.inputWrapper}>
                     <TextInput secureTextEntry
@@ -75,6 +89,9 @@ const LoginScreen = (props) => {
             <TouchableOpacity style={styles.loginButton} onPress={() => onPressLogin()}>
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
+            <View style={styles.buttonToken}>
+                <Button title='Check access_token' onPress={() => console.log(SecureStore.getItem("access_token"), "<<<<<<<<<<<<")} />
+            </View>
         </View>
     )
 }
@@ -125,6 +142,13 @@ const styles = {
     registerButton: {
         alignSelf: 'flex-end',
         paddingVertical: 20,
+        marginBottom: 30,
+    },
+    buttonToken: {
+        padding: 0,
+        textAlign: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
         marginBottom: 30,
     }
 };

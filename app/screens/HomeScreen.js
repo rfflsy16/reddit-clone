@@ -1,5 +1,8 @@
-import { View, FlatList, TextInput, TouchableOpacity, Text, Image } from 'react-native';
+import { View, FlatList, TextInput, TouchableOpacity, Text, Image, Button } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useEffect } from 'react';
+import * as SecureStore from 'expo-secure-store'
+
 
 const data = [
     {
@@ -16,8 +19,13 @@ const data = [
     }
 ]
 const HomeScreen = (props) => {
+    const access_token = SecureStore.getItem('access_token')
     const { navigation } = props;
 
+    const logout = async () => {
+        await SecureStore.deleteItemAsync("access_token")
+        navigation.push('Login')
+    }
     const renderItem = ({ item }) => {
         const {
             id,
@@ -29,7 +37,6 @@ const HomeScreen = (props) => {
             likes,
             createdAt
         } = item;
-
         return (
             <View style={styles.cardItem}>
                 <View style={styles.cardItemTop}>
@@ -48,13 +55,19 @@ const HomeScreen = (props) => {
     }
 
     return (
-        <View style={styles.container}>
-            <FlatList
-                data={data}
-                renderItem={renderItem}
-                keyExtractor={(it, idx) => `list-item-${idx.toString()}`}
-            />
-        </View>
+        <>
+            <View>
+                <Button title='Logout' onPress={logout} />
+            </View>
+            <View style={styles.container}>
+                <FlatList
+                    data={data}
+                    renderItem={renderItem}
+                    keyExtractor={(it, idx) => `list-item-${idx.toString()}`}
+                />
+            </View>
+        </>
+
     )
 }
 

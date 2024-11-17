@@ -1,27 +1,86 @@
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
+import { REGISTER } from '../queries';
+import { useMutation } from '@apollo/client';
+import { useState } from 'react';
 
-const RegisterScreen = () => {
+const RegisterScreen = (props) => {
+    const { navigation } = props
+    const [input, setInput] = useState({
+        name: '',
+        username: '',
+        email: '',
+        password: '',
+    })
+    const [RegisterFn, { data, loading, error }] = useMutation(REGISTER)
+
+    const onPressRegister = () => {
+        if (!input.name || !input.username || !input.email || !input.password) {
+            console.log('Name, Username, Email, and Password is required')
+
+            return
+        }
+
+        console.log('INPUT REGISTER', input);
+        RegisterFn({
+            variables: {
+                newUser: input
+            }
+        })
+
+        navigation.push("Login")
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.form}>
                 <Text style={styles.title}>Hello, Welcome to Reddit</Text>
                 <View style={styles.inputWrapper}>
-                    <TextInput placeholder='Name' style={styles.textinput} />
+                    <TextInput placeholder='Name'
+                        autoCapitalize='none'
+                        style={styles.textinput}
+                        value={input.name}
+                        onChangeText={(text) => setInput({
+                            ...input,
+                            name: text
+                        })} />
                 </View>
                 <View style={styles.inputWrapper}>
-                    <TextInput placeholder='Username' style={styles.textinput} />
+                    <TextInput placeholder='Username'
+                        autoCapitalize='none'
+                        style={styles.textinput}
+                        value={input.username}
+                        onChangeText={(text) => setInput({
+                            ...input,
+                            username: text
+                        })} />
                 </View>
                 <View style={styles.inputWrapper}>
-                    <TextInput placeholder='Email' style={styles.textinput} />
+                    <TextInput placeholder='Email'
+                        autoCapitalize='none'
+                        style={styles.textinput}
+                        value={input.email}
+                        inputMode='email'
+                        onChangeText={(text) => setInput({
+                            ...input,
+                            email: text
+                        })} />
                 </View>
                 <View style={styles.inputWrapper}>
                     <TextInput secureTextEntry
+                        autoCapitalize='none'
                         placeholder='Password'
                         style={styles.textinput}
+                        value={input.password}
+                        onChangeText={(text) => {
+                            setInput({
+                                ...input,
+                                password: text
+                            })
+                        }}
                     />
                 </View>
             </View>
-            <TouchableOpacity style={styles.loginButton}>
+            <TouchableOpacity style={styles.loginButton} onPress={onPressRegister}>
                 <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
         </View>
