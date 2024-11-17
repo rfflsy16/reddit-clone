@@ -2,25 +2,34 @@ import { View, FlatList, TextInput, TouchableOpacity, Text, Image, Button } from
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store'
+import { useMutation, useQuery } from '@apollo/client';
+import { GET_POST } from '../queries';
+import { StyleSheet } from 'react-native';
 
 
-const data = [
-    {
-        id: "",
-        content: "Test content",
-        tags: "",
-        imgUrl: "",
-        authorId: "an author",
-        comments: [1, 2],
-        likes: "",
-        createdAt: "2024-11-01",
-        updatedAt: "",
+// const data = [
+//     {
+//         id: "",
+//         content: "Test content",
+//         tags: "",
+//         imgUrl: "",
+//         authorId: "an author",
+//         comments: [1, 2],
+//         likes: "",
+//         createdAt: "2024-11-01",
+//         updatedAt: "",
 
-    }
-]
+//     }
+// ]
+
+
 const HomeScreen = (props) => {
     const access_token = SecureStore.getItem('access_token')
     const { navigation } = props;
+    const { loading, error, data } = useQuery(GET_POST)
+
+    if (loading) return <Text>Loading ... </Text>
+    if (error) console.log(error)
 
     const logout = async () => {
         await SecureStore.deleteItemAsync("access_token")
@@ -36,12 +45,12 @@ const HomeScreen = (props) => {
             comments,
             likes,
             createdAt
-        } = item;
+        } = item
         return (
             <View style={styles.cardItem}>
                 <View style={styles.cardItemTop}>
                     <Text>{content}</Text>
-                    <Text>{authorId}</Text>
+                    {/* <Text>{authorId}</Text> */}
                 </View>
                 <View style={styles.cardItemBottom}>
                     <View style={styles.cardItemActions}>
@@ -56,12 +65,13 @@ const HomeScreen = (props) => {
 
     return (
         <>
+            <Button title='Profile' onPress={() => navigation.push('Profile')} />
             <View>
                 <Button title='Logout' onPress={logout} />
             </View>
             <View style={styles.container}>
                 <FlatList
-                    data={data}
+                    data={data.getPost}
                     renderItem={renderItem}
                     keyExtractor={(it, idx) => `list-item-${idx.toString()}`}
                 />
@@ -73,7 +83,7 @@ const HomeScreen = (props) => {
 
 export default HomeScreen;
 
-const styles = {
+const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 0,
@@ -99,5 +109,16 @@ const styles = {
     cardItemActions: {
         flexDirection: 'row',
         alignItems: 'center'
+    },
+    profile: {
+        padding: 20,
+        textAlign: 'center',
+        alignItems: 'center',
+
+        justifyContent: 'center',
+        borderRadius: 10,
+        backgroundColor: '#f54242',
+        marginBottom: 30,
     }
-};
+
+});

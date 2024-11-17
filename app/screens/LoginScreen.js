@@ -11,7 +11,9 @@ const LoginScreen = (props) => {
     const access_token = SecureStore.getItem("access_token")
     const { navigation } = props;
     const authContext = useContext(LoginContext)
-    const [loginFn, { data, loading, error }] = useMutation(LOGIN);
+    const [loginFn, { loading, error, data }] = useMutation(LOGIN);
+
+    // console.log(data)
 
     useEffect(() => {
         if (access_token) {
@@ -62,6 +64,7 @@ const LoginScreen = (props) => {
                 <Text style={styles.title}>Enter Your Login Information</Text>
                 <View style={styles.inputWrapper}>
                     <TextInput placeholder='Email'
+                        autoCapitalize='none'
                         style={styles.textinput}
                         value={input.email}
                         inputMode='email'
@@ -76,6 +79,7 @@ const LoginScreen = (props) => {
                     <TextInput secureTextEntry
                         placeholder='Password'
                         style={styles.textinput}
+                        autoCapitalize='none'
                         value={input.password}
                         onChangeText={(text) => {
                             setInput({
