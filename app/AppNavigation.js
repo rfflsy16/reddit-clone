@@ -20,7 +20,7 @@ export const AppNavigation = () => {
       <Stack.Navigator>
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: "Login" }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ title: "Register" }} />
-        <Stack.Screen name="MainTab" component={MainTab} options={{ title: "MainTab" }} />
+        <Stack.Screen name="MainTab" component={MainTab} options={{ title: "Home" }} />
 
         {/* <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Home" }} />
         <Stack.Screen name="Profile" component={Profile} options={{ title: "Profile" }} /> */}
